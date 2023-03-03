@@ -10,7 +10,7 @@ def bad_years
   # List the years in which no movie with a rating above 8 was released.
   # SELECT yr FROM movies WHERE movies.yr NOT IN (SELECT yr FROM movies WHERE movies.score > 8) GROUP BY yr
   Movie
-    .where.not(yr: 
+    .where.not(yr:
       Movie
         .select(:yr)
         .where('score > 8')
@@ -34,11 +34,20 @@ def vanity_projects
   # starring actor. Show the movie id, title, and director's name.
 
   # Note: Directors appear in the 'actors' table.
-  
+  Movie
+    .select(:id, :title, :name)
+    .joins(:castings, :director)
+    .where('director_id = actor_id AND ord = 1')
 end
 
 def most_supportive
   # Find the two actors with the largest number of non-starring roles.
   # Show each actor's id, name, and number of supporting roles.
-  
+  Movie
+    .select('actors.id, name, COUNT(*) AS roles')
+    .joins(:actors)
+    .where('ord != 1')
+    .group('actors.id, name')
+    .order(roles: :desc)
+    .limit(2)
 end
